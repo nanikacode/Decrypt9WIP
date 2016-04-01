@@ -1,10 +1,8 @@
 #ifdef EXEC_BOOTSTRAP
 
-.section ".init"
-.global _start
-.extern main
+.section .text.start
 .align 4
-.arm
+.global _start
 _start:
     @ Change the stack pointer
     mov sp, #0x27000000
@@ -49,6 +47,11 @@ _start:
     mcr p15, 0, r0, c7, c5, 0  @ flush I-cache
     mcr p15, 0, r0, c7, c6, 0  @ flush D-cache
     mcr p15, 0, r0, c7, c10, 4 @ drain write buffer
+
+    @ Fix mounting of SDMC
+    ldr r0, =0x10000020
+    mov r1, #0x340
+    str r1, [r0]
 
     bl main
 
