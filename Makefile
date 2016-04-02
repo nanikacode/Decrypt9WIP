@@ -119,8 +119,8 @@ payload: common
 
 cakehax: submodules common
 	@make --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
-	@make dir_out=$(OUTPUT_D) name=$(TARGET).dat -C CakeHax bigpayload
-	@dd if=$(OUTPUT).bin of=$(OUTPUT).dat bs=512 seek=160
+	@make dir_out=$(OUTPUT_D) name=$(TARGET).dat -C CakeHax launcher
+	@dd if=$(OUTPUT).bin of=$(OUTPUT).dat bs=512 seek=144
     
 cakerop: cakehax
 	@make DATNAME=$(TARGET).dat DISPNAME=$(TARGET) GRAPHICS=../resources/CakesROP -C CakesROP
