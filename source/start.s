@@ -1,5 +1,3 @@
-#ifdef EXEC_BOOTSTRAP
-
 .section .text.start
 .align 4
 .global _start
@@ -57,5 +55,3 @@ _start:
 
 .die:
     b .die
-
-#endif // EXEC_BOOTSTRAP

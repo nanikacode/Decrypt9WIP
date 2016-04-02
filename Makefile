@@ -18,7 +18,7 @@ include $(DEVKITARM)/ds_rules
 #---------------------------------------------------------------------------------
 export TARGET	:=	Decrypt9WIP
 BUILD		:=	build
-SOURCES		:=	source source/fatfs source/decryptor source/abstraction
+SOURCES		:=	source source/fatfs source/decryptor
 DATA		:=	data
 INCLUDES	:=	include source source/fatfs
 
@@ -48,13 +48,7 @@ endif
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
 
 ASFLAGS	:=	-g $(ARCH) -DEXEC_$(EXEC_METHOD)
-LDFLAGS	=	-nostartfiles -g $(ARCH) -Wl,-Map,$(TARGET).map
-
-ifeq ($(EXEC_METHOD),GATEWAY)
-	LDFLAGS += --specs=../gateway.specs
-else ifeq ($(EXEC_METHOD),BOOTSTRAP)
-	LDFLAGS += --specs=../bootstrap.specs
-endif
+LDFLAGS	=   -nostartfiles -g $(ARCH) -Wl,-Map,$(TARGET).map --specs=../linker.specs
 
 LIBS	:=
 
@@ -120,16 +114,11 @@ common:
 submodules:
 	@-git submodule update --init --recursive
 
-gateway: common
-	@make --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile EXEC_METHOD=GATEWAY
-	@cp resources/LauncherTemplate.dat $(OUTPUT_D)/Launcher.dat
-	@dd if=$(OUTPUT).bin of=$(OUTPUT_D)/Launcher.dat bs=1497296 seek=1 conv=notrunc
-
 bootstrap: common
-	@make --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile EXEC_METHOD=BOOTSTRAP
+	@make --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 
 cakehax: submodules common
-	@make --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile EXEC_METHOD=GATEWAY
+	@make --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 	@make dir_out=$(OUTPUT_D) name=$(TARGET).dat -C CakeHax bigpayload
 	@dd if=$(OUTPUT).bin of=$(OUTPUT).dat bs=512 seek=160
     
@@ -147,15 +136,11 @@ brahma: submodules bootstrap
 	@mv BrahmaLoader/output/*.smdh $(OUTPUT_D)
 	
 release:
-	@rm -fr $(BUILD) $(OUTPUT_D) $(RELEASE)
-	@make --no-print-directory gateway
+	@make --no-print-directory brahma
 	@-make --no-print-directory cakerop
-	@rm -fr $(BUILD) $(OUTPUT).bin $(OUTPUT).elf $(CURDIR)/$(LOADER)/data
-	@-make --no-print-directory brahma
 	@[ -d $(RELEASE) ] || mkdir -p $(RELEASE)
 	@[ -d $(RELEASE)/$(TARGET) ] || mkdir -p $(RELEASE)/$(TARGET)
 	@[ -d $(RELEASE)/scripts ] || mkdir -p $(RELEASE)/scripts
-	@cp $(OUTPUT_D)/Launcher.dat $(RELEASE)
 	@-cp $(OUTPUT).bin $(RELEASE)
 	@-cp $(OUTPUT).dat $(RELEASE)
 	@-cp $(OUTPUT).nds $(RELEASE)
